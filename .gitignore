@@ -1,0 +1,80 @@
+# Compiled source
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.mo
+
+# Packages
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Redis append only log
+*.aof
+
+# celeryev dump
+dump.rdb
+celerybeat-schedule
+
+# OS generated files
+.DS_Store?
+.DS_Store
+ehthumbs.db
+Icon?
+Thumbs.db
+
+*.swp
+*.egg
+*.egg-info
+*.pyc
+*$py.class
+*.pt.py
+*.txt.py
+*~
+*.log
+*.pot
+
+# Dev helpers
+Makefile
+.lvimrc
+tags
+
+# virtualenv
+/bikecompetition/env/*
+/bikecompetition/.env/*
+/env/*
+/.env/*
+
+# instance configurations
+# /bikecompetition/dev_settings.py
+
+# static files
+/bikecompetition/static/
+
+# media files
+/bikecompetition/media/
+
+# static analysis and tools
+.ropeproject
+.coverage
+
+# local files that don't get tracked
+/bikecompetition/untracked/
+
+#PyCharm project folder
+.idea/*
+bikecompetition/.idea/*
+
