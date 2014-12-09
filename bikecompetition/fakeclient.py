@@ -72,27 +72,21 @@ class FakeClient(object):
                                          timestamp=datetime.strftime(datetime.now(), '%d/%m/%Y %H:%M:%S.%f')).json()
         log_debug(status=status)
         distance = 0
-        while status['competition_status'] == 0:
-            log_debug(substatus="pending")
+        while True:
+            log_debug(substatus="updating")
             time.sleep(0.5)
             distance += random.randint(0, 9)
+            status_before = status['competition_status']
             status = self.update_competition(competitor=competitor,
                                              competition=competition,
                                              distance=distance,
                                              timestamp=datetime.strftime(datetime.now(), '%d/%m/%Y %H:%M:%S.%f')).json()
-            log_debug(distance=distance, status=status)
-        log_debug(progress="Competition started")
-        distance = 0
-        while status['competition_status'] == 1:
-            log_debug(substatus="started")
-            time.sleep(0.5)
-            distance += random.randint(0, 9)
-            status = self.update_competition(competitor=competitor,
-                                             competition=competition,
-                                             distance=distance,
-                                             timestamp=datetime.strftime(datetime.now(), '%d/%m/%Y %H:%M:%S.%f')).json()
-            log_debug(distance=distance, status=status)
-        log_debug(progress="Competition finished")
+
+            if status_before == 0 and status['competition_status'] == 1:
+                distance = 0
+            log_debug(distance=distance, status_before=status_before, status=status)
+            if status['competition_status'] == 2:
+                break
 
 
 if __name__ == '__main__':

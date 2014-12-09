@@ -76,7 +76,7 @@ def update_competition(request):
             ).update(status=bcModels.COMPETITION_STATUS_FINISHED)
 
     elif competitor_status.status == bcModels.COMPETITION_STATUS_FINISHED:
-        competitor_stats = bcModels.Competition.objects.get_stats(competition.id)
+        competitor_stats, competitor_times = bcModels.Competition.objects.get_stats(competition.id)
     resp_dict = {
         'competition_id': competition.id,
         'competition_status': competitor_status.status,

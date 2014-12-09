@@ -37,7 +37,7 @@ class CompetitionManager(models.Manager):
             statistic_first = CompetitorStats.objects.filter(competitor_id=competitor.id, competition_id=competition_id).order_by('timestamp').first()
             if statistic_last and statistic_first:
                 results[competitor.id] = statistic_last.distance
-                results_times[competitor.id] = (statistic_last.timestamp - statistic_first.timestamp).seconds
+                results_times[competitor.id] = (statistic_last.timestamp - statistic_first.timestamp).total_seconds()
         return results, results_times
 
 
