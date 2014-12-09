@@ -14,7 +14,6 @@ class Migration(migrations.Migration):
             name='Competition',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('status', models.PositiveSmallIntegerField(default=0, choices=[(0, 'Pending'), (1, 'Started'), (2, 'Finished')])),
                 ('type', models.PositiveSmallIntegerField(default=0, choices=[(0, 'Time Cpmpetition'), (1, 'Distance Cpmpetition')])),
             ],
             options={
@@ -35,7 +34,20 @@ class Migration(migrations.Migration):
             name='CompetitorStats',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('timestamp', models.DateTimeField()),
                 ('distance', models.PositiveIntegerField()),
+                ('competition', models.ForeignKey(to='bc.Competition')),
+                ('competitor', models.ForeignKey(to='bc.Competitor')),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='CompetitorStatus',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('status', models.PositiveSmallIntegerField(default=0, choices=[(0, 'Pending'), (1, 'Started'), (2, 'Finished')])),
                 ('competition', models.ForeignKey(to='bc.Competition')),
                 ('competitor', models.ForeignKey(to='bc.Competitor')),
             ],

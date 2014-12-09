@@ -1,10 +1,10 @@
-from tastypie.resources import ModelResource
-from tastypie.authentication import Authentication
-from tastypie.authorization import Authorization
 from bikecompetition.bc.models import (Competition,
                                        Competitor,
-                                       CompetitorStats,
-)
+                                       CompetitorStats)
+from tastypie.authentication import Authentication
+from tastypie.authorization import Authorization
+from tastypie.constants import ALL
+from tastypie.resources import ModelResource
 
 
 class CompetitionResource(ModelResource):
@@ -19,10 +19,6 @@ class CompetitorResource(ModelResource):
         queryset = Competitor.objects.all()
         authentication = Authentication()
         authorization = Authorization()
+        filtering = {"name": ALL}
+        always_return_data = True
 
-
-class CompetitorStatsResource(ModelResource):
-    class Meta:
-        queryset = CompetitorStats.objects.all()
-        authentication = Authentication()
-        authorization = Authorization()

@@ -2,6 +2,7 @@
 # insert into bc_competitor (id, name) values (1,'First')(2, 'Second'); insert into bc_competition (id, type, status) values (1, 1, 0);
 #
 
+from datetime import datetime
 from django.db import models
 from django.utils.translation import ugettext_lazy as _i
 
@@ -30,24 +31,33 @@ class Competitor(models.Model):
 class CompetitionManager(models.Manager):
     def get_stats(self, competition_id):
         results = {}
+        results_times = {}
         for competitor in self.get(id=competition_id).competitors.all():
-            statistic = CompetitorStats.objects.filter(competitor_id=competitor.id, competition_id=competition_id).last()
-            if statistic:
-                results[competitor.id] = statistic.distance
-        return results
+            statistic_last = CompetitorStats.objects.filter(competitor_id=competitor.id, competition_id=competition_id).order_by('timestamp').last()
+            statistic_first = CompetitorStats.objects.filter(competitor_id=competitor.id, competition_id=competition_id).order_by('timestamp').first()
+            if statistic_last and statistic_first:
+                results[competitor.id] = statistic_last.distance
+                results_times[competitor.id] = (statistic_last.timestamp - statistic_first.timestamp).seconds
+        return results, results_times
 
 
 class Competition(models.Model):
     competitors = models.ManyToManyField(Competitor)
-    status = models.PositiveSmallIntegerField(choices=COMPETITION_STATUSES, default=COMPETITION_STATUS_PENDING)
     type = models.PositiveSmallIntegerField(choices=COMPETITION_TYPES, default=COMPETITION_TYPE_TIME)
 
     objects = CompetitionManager()
 
 
 class CompetitorStats(models.Model):
+    timestamp = models.DateTimeField()
     competitor = models.ForeignKey(Competitor)
     competition = models.ForeignKey(Competition)
     distance = models.PositiveIntegerField()
+
+class CompetitorStatus(models.Model):
+    competitor = models.ForeignKey(Competitor)
+    competition = models.ForeignKey(Competition)
+    status = models.PositiveSmallIntegerField(choices=COMPETITION_STATUSES, default=COMPETITION_STATUS_PENDING)
+
 
 
