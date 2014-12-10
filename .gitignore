@@ -60,6 +60,9 @@ tags
 
 # instance configurations
 /bikecompetition/dev_settings.py
+/bikecompetition/wsgi.ini
+/bikecompetition/nginx.conf
+/bikecompetition/wsgi.pid
 
 # static files
 /bikecompetition/static/
