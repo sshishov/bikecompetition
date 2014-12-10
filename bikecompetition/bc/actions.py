@@ -25,7 +25,7 @@ def get_competition(request):
     competitor = request_json['competitor']
     fake = request_json['fake']
     if int(fake):
-        t = threading.Thread(target=FakeClient(id=competitor).start).start()
+        threading.Thread(target=FakeClient(id=competitor).start).start()
         return HttpResponse(content=json.dumps({}), content_type="application/json", status=200)
 
     competition = bcModels.Competition.objects.filter(type=competition_type).last()
