@@ -1,4 +1,5 @@
 import json
+import subprocess
 
 from datetime import datetime
 from django.http import HttpResponse, HttpResponseBadRequest, Http404, HttpResponseNotFound
@@ -23,9 +24,8 @@ def get_competition(request):
     competition_type = request_json['competition_type']
     competitor = request_json['competitor']
     fake = request_json['fake']
-    if fake:
-        fakeclient = FakeClient(id=competitor)
-        fakeclient.start()
+    if int(fake):
+        subprocess.Popen(["python", "fakeclient.py", '--id', competitor])
         return HttpResponse(content=json.dumps({}), content_type="application/json", status=200)
 
     competition = bcModels.Competition.objects.filter(type=competition_type).last()
