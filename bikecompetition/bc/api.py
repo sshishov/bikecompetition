@@ -19,6 +19,3 @@ class CompetitorResource(ModelResource):
         queryset = Competitor.objects.all()
         authentication = Authentication()
         authorization = Authorization()
-        filtering = {"name": ALL}
-        always_return_data = True
-

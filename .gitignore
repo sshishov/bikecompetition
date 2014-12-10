@@ -59,7 +59,7 @@ tags
 /.env/*
 
 # instance configurations
-# /bikecompetition/dev_settings.py
+/bikecompetition/dev_settings.py
 
 # static files
 /bikecompetition/static/

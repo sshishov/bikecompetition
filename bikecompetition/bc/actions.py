@@ -6,6 +6,16 @@ from django.views.decorators.csrf import csrf_exempt
 
 from bikecompetition.bc import models as bcModels
 
+
+@csrf_exempt
+def get_competitor(request):
+    request_json = json.loads(request.body)
+    name = request_json['name']
+    competitor, created = bcModels.Competitor.objects.get_or_create(name=name)
+    response = {'id': competitor.id, 'name': competitor.name}
+    return HttpResponse(content=json.dumps(response), content_type="application/json", status=201 if created else 200)
+
+
 @csrf_exempt
 def get_competition(request):
     request_json = json.loads(request.body)
@@ -14,9 +24,9 @@ def get_competition(request):
     competition = bcModels.Competition.objects.filter(type=competition_type).last()
 
     if competition and any((competitor_status.status != bcModels.COMPETITION_STATUS_PENDING for competitor_status in \
-            bcModels.CompetitorStatus.objects.filter(
-                    competition_id=competition.id
-            )
+                            bcModels.CompetitorStatus.objects.filter(
+                                    competition_id=competition.id
+                            )
     )):
         competition = None
     if not competition:
@@ -34,12 +44,13 @@ def get_competition(request):
     else:
         competitor_status = competitor_status.last()
     resp_dict = {
-        'competition_id':  competition.id,
+        'competition_id': competition.id,
         'competition_type': competition.type,
         'competition_status': competitor_status.status,
         'competitor_count': competition.competitors.all().count(),
     }
     return HttpResponse(content=json.dumps(resp_dict), content_type="application/json", status=201)
+
 
 @csrf_exempt
 def update_competition(request):
@@ -65,10 +76,10 @@ def update_competition(request):
         bcModels.CompetitorStats.objects.create(competition_id=competition.id,
                                                 competitor_id=competitor.id,
                                                 distance=distance,
-                                                timestamp=datetime.strptime(timestamp,'%d/%m/%Y %H:%M:%S.%f'))
+                                                timestamp=datetime.strptime(timestamp, '%d/%m/%Y %H:%M:%S.%f'))
         competitor_stats, competitor_times = bcModels.Competition.objects.get_stats(competition.id)
         if (competition.type == bcModels.COMPETITION_TYPE_DISTANCE and \
-                any(((distance > 50) for distance in competitor_stats.itervalues()))) or \
+                    any(((distance > 50) for distance in competitor_stats.itervalues()))) or \
                 (competition.type == bcModels.COMPETITION_TYPE_TIME and \
                          any(((timedelta > 30) for timedelta in competitor_times.itervalues()))):
             bcModels.CompetitorStatus.objects.filter(
@@ -84,6 +95,7 @@ def update_competition(request):
         'competition_times': competitor_times
     }
     return HttpResponse(content=json.dumps(resp_dict), content_type="application/json", status=201)
+
 
 @csrf_exempt
 def finish_competition(request):

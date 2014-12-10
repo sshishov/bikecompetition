@@ -24,6 +24,7 @@ COMPETITION_TYPES = (
     (COMPETITION_TYPE_DISTANCE, _i(u'Distance Cpmpetition')),
 )
 
+
 class Competitor(models.Model):
     name = models.CharField(max_length=30)
 
@@ -33,8 +34,11 @@ class CompetitionManager(models.Manager):
         results = {}
         results_times = {}
         for competitor in self.get(id=competition_id).competitors.all():
-            statistic_last = CompetitorStats.objects.filter(competitor_id=competitor.id, competition_id=competition_id).order_by('timestamp').last()
-            statistic_first = CompetitorStats.objects.filter(competitor_id=competitor.id, competition_id=competition_id).order_by('timestamp').first()
+            statistic_last = CompetitorStats.objects.filter(competitor_id=competitor.id,
+                                                            competition_id=competition_id).order_by('timestamp').last()
+            statistic_first = CompetitorStats.objects.filter(competitor_id=competitor.id,
+                                                             competition_id=competition_id).order_by(
+                'timestamp').first()
             if statistic_last and statistic_first:
                 results[competitor.id] = statistic_last.distance
                 results_times[competitor.id] = (statistic_last.timestamp - statistic_first.timestamp).total_seconds()
@@ -53,6 +57,7 @@ class CompetitorStats(models.Model):
     competitor = models.ForeignKey(Competitor)
     competition = models.ForeignKey(Competition)
     distance = models.PositiveIntegerField()
+
 
 class CompetitorStatus(models.Model):
     competitor = models.ForeignKey(Competitor)

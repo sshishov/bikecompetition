@@ -7,8 +7,8 @@ DATABASES = {
         'USER': 'bikecompetition_user',
         'PASSWORD': 'bikecompetition_password',
         'HOST': 'localhost',
-        #'PORT': '5432', #PostgreSQL 9.1
+        # 'PORT': '5432', #PostgreSQL 9.1
         #'PORT': '5433', #PostgreSQL 9.2
-        'PORT': '5434', #PostgreSQL 9.3
+        'PORT': '5434',  #PostgreSQL 9.3
     }
 }
