@@ -1,5 +1,5 @@
 import json
-import subprocess
+import threading
 
 from datetime import datetime
 from django.http import HttpResponse, HttpResponseBadRequest, Http404, HttpResponseNotFound
@@ -25,7 +25,7 @@ def get_competition(request):
     competitor = request_json['competitor']
     fake = request_json['fake']
     if int(fake):
-        subprocess.Popen(["python", "fakeclient.py", '--id', competitor])
+        t = threading.Thread(target=FakeClient(id=competitor).start).start()
         return HttpResponse(content=json.dumps({}), content_type="application/json", status=200)
 
     competition = bcModels.Competition.objects.filter(type=competition_type).last()
