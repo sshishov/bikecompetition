@@ -1,4 +1,5 @@
 import json
+import operator
 import os
 import requests
 import sys
@@ -6,6 +7,7 @@ import time
 import random
 
 from datetime import datetime
+from optparse import OptionParser
 
 HOST = 'localhost'
 PORT = 8001
@@ -16,10 +18,15 @@ def log_debug(**kwargs):
     if DEBUG:
         print json.dumps(kwargs)
 
+def get_max_key(d):
+     v=list(d.values())
+     return list(d.keys())[v.index(max(v))]
 
 class FakeClient(object):
-    def __init__(self):
+    def __init__(self, id=None, name=None):
         self.headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+        self.id = id
+        self.name = name
 
     def _get(self, url, **params):
         return requests.get(url, params=params, headers=self.headers)
@@ -49,12 +56,15 @@ class FakeClient(object):
             competition=competition, competitor=competitor, distance=0)
         return status.json()
 
-    def start(self, args):
-        name = args[0] if args else 'FakeClient'
-        competitor = self.get_competitor(name=name)['id']
+    def start(self):
+        if self.id:
+            competitor = self.id
+        else:
+            competitor = self.get_competitor(name=self.name)['id']
         log_debug(competitor=competitor)
         competition = self.get_competition(competitor=competitor,
-                                           competition_type=1)['competition_id']
+                                           competition_type=1,
+                                           fake=0)['competition_id']
         log_debug(competition=competition)
         status = self.update_competition(competitor=competitor,
                                          competition=competition,
@@ -78,7 +88,20 @@ class FakeClient(object):
             if status['competition_status'] == 2:
                 break
 
+        winner = get_max_key(status['competition_stats'])
+        if int(competitor) == int(winner):
+            print "YOU ARE THE WINNER!"
+        else:
+            print "YOU ARE THE LOOSER!"
+
 
 if __name__ == '__main__':
-    fakeclient = FakeClient()
-    fakeclient.start(sys.argv[1:])
+    parser = OptionParser()
+    parser.add_option("--name", dest="name", help="Competitor name")
+    parser.add_option("--id", dest="id", help="Competitor id (more priority)")
+
+    (options, args) = parser.parse_args()
+    if not options.name and not options.id:
+        parser.error("Either name or id of competitor should be specified")
+    fakeclient = FakeClient(id=options.id, name=options.name)
+    fakeclient.start()

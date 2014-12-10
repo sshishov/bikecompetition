@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseBadRequest, Http404, HttpRespo
 from django.views.decorators.csrf import csrf_exempt
 
 from bikecompetition.bc import models as bcModels
+from bikecompetition.fakeclient import FakeClient
 
 
 @csrf_exempt
@@ -21,8 +22,13 @@ def get_competition(request):
     request_json = json.loads(request.body)
     competition_type = request_json['competition_type']
     competitor = request_json['competitor']
-    competition = bcModels.Competition.objects.filter(type=competition_type).last()
+    fake = request_json['fake']
+    if fake:
+        fakeclient = FakeClient(id=competitor)
+        fakeclient.start()
+        return HttpResponse(content=json.dumps({}), content_type="application/json", status=200)
 
+    competition = bcModels.Competition.objects.filter(type=competition_type).last()
     if competition and any((competitor_status.status != bcModels.COMPETITION_STATUS_PENDING for competitor_status in \
                             bcModels.CompetitorStatus.objects.filter(
                                     competition_id=competition.id
