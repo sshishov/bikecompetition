@@ -23,7 +23,7 @@ def get_max_key(d):
      return list(d.keys())[v.index(max(v))]
 
 class FakeClient(object):
-    def __init__(self, id=None, name=None, competition_type):
+    def __init__(self, id=None, name=None, competition_type=None):
         self.headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
         self.id = id
         self.name = name
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("--name", dest="name", help="Competitor name")
     parser.add_option("--id", dest="id", help="Competitor id (more priority)")
-    parser.add_option("--competition_type" dest="competition_type" help="Competition_type")
+    parser.add_option("--competition_type", dest="competition_type", help="Competition_type")
 
     (options, args) = parser.parse_args()
     if not options.name and not options.id:
