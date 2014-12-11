@@ -89,11 +89,14 @@ class FakeClient(object):
             if status['competition_status'] == 2:
                 break
 
-        winner = get_max_key(status['competition_stats'])
-        if int(competitor) == int(winner):
-            print "YOU ARE THE WINNER!"
+        if status['competition_stats']:
+            winner = get_max_key(status['competition_stats'])
+            if int(competitor) == int(winner):
+                print "YOU ARE THE WINNER!"
+            else:
+                print "YOU ARE THE LOOSER!"
         else:
-            print "YOU ARE THE LOOSER!"
+            print "COMPETITION FINISHED WITHOUT RESULTS!"
 
 
 if __name__ == '__main__':

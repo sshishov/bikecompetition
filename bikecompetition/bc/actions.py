@@ -98,23 +98,28 @@ def update_competition(request):
         'competition_id': competition.id,
         'competition_status': competitor_status.status,
         'competition_stats': competitor_stats,
-        'competition_times': competitor_times
+        'competition_times': competitor_times,
     }
     return HttpResponse(content=json.dumps(resp_dict), content_type="application/json", status=201)
 
 
 @csrf_exempt
 def finish_competition(request):
-    competition_id = request.POST.get('competition_id')
-    competition = bcModels.Competition.objects.get(competition_id)
+    request_json = json.loads(request.body)
+    competition = request_json['competition']
+    competitor = request_json['competitor']
     competitor_status = bcModels.CompetitorStatus.objects.get(
         competitor_id=competitor,
         competition_id=competition
     )
-    resp_dict = {
-        'competition_id': competition.id,
-        'competition_status': competition.status
-    }
-    competitor_status = bcModels.COMPETITION_STATUS_FINISHED
+    competitor_status.status = bcModels.COMPETITION_STATUS_FINISHED
     competitor_status.save()
-    return HttpResponse(content=json.dumps(resp_dict), content_type="application/json", status=201)
+    competitor_stats, competitor_times = bcModels.Competition.objects.get_stats(competition)
+    resp_dict = {
+        'competition_id': competition,
+        'competitor_id': competitor,
+        'competition_status': competitor_status.status,
+        'competition_stats': competitor_stats,
+        'competition_times': competitor_times,
+    }
+    return HttpResponse(content=json.dumps(resp_dict), content_type="application/json", status=200)
