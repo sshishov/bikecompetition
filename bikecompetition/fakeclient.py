@@ -23,10 +23,11 @@ def get_max_key(d):
      return list(d.keys())[v.index(max(v))]
 
 class FakeClient(object):
-    def __init__(self, id=None, name=None):
+    def __init__(self, id=None, name=None, competition_type):
         self.headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
         self.id = id
         self.name = name
+        self.competition_type = competition_type
 
     def _get(self, url, **params):
         return requests.get(url, params=params, headers=self.headers)
@@ -63,19 +64,19 @@ class FakeClient(object):
             competitor = self.get_competitor(name=self.name)['id']
         log_debug(competitor=competitor)
         competition = self.get_competition(competitor=competitor,
-                                           competition_type=1,
+                                           competition_type=self.competition_type,
                                            fake=0)['competition_id']
         log_debug(competition=competition)
         status = self.update_competition(competitor=competitor,
                                          competition=competition,
-                                         distance=random.randint(0, 9),
+                                         distance=random.randint(1, 2),
                                          timestamp=datetime.strftime(datetime.now(), '%d/%m/%Y %H:%M:%S.%f'))
         log_debug(status=status)
         distance = 0
         while True:
             log_debug(substatus="updating")
-            time.sleep(0.5)
-            distance += random.randint(0, 9)
+            time.sleep(1)
+            distance += random.randint(1, 2)
             status_before = status['competition_status']
             status = self.update_competition(competitor=competitor,
                                              competition=competition,
@@ -99,9 +100,12 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("--name", dest="name", help="Competitor name")
     parser.add_option("--id", dest="id", help="Competitor id (more priority)")
+    parser.add_option("--competition_type" dest="competition_type" help="Competition_type")
 
     (options, args) = parser.parse_args()
     if not options.name and not options.id:
         parser.error("Either name or id of competitor should be specified")
-    fakeclient = FakeClient(id=options.id, name=options.name)
+    fakeclient = FakeClient(id=options.id,
+                            name=options.name,
+                            competition_type=options.competition_type if options.competition_type else 0)
     fakeclient.start()
