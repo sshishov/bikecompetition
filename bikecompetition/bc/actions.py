@@ -2,11 +2,17 @@ import json
 import threading
 
 from datetime import datetime
-from django.http import HttpResponse, HttpResponseBadRequest, Http404, HttpResponseNotFound
+from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from bikecompetition.bc import models as bcModels
 from bikecompetition.fakeclient import FakeClient
+
+
+# Competition distance in miles * 1000
+COMPETITION_DISTANCE = 50
+# Competition time in seconds
+COMPETITION_TIME = 30
 
 
 @csrf_exempt
@@ -85,9 +91,9 @@ def update_competition(request):
                                                 timestamp=datetime.strptime(timestamp, '%d/%m/%Y %H:%M:%S.%f'))
         competitor_stats, competitor_times = bcModels.Competition.objects.get_stats(competition.id)
         if (competition.type == bcModels.COMPETITION_TYPE_DISTANCE and \
-                    any(((distance > 50) for distance in competitor_stats.itervalues()))) or \
+                    any(((distance > COMPETITION_DISTANCE) for distance in competitor_stats.itervalues()))) or \
                 (competition.type == bcModels.COMPETITION_TYPE_TIME and \
-                         any(((timedelta > 30) for timedelta in competitor_times.itervalues()))):
+                         any(((timedelta > COMPETITION_TIME) for timedelta in competitor_times.itervalues()))):
             bcModels.CompetitorStatus.objects.filter(
                 competition_id=competition
             ).update(status=bcModels.COMPETITION_STATUS_FINISHED)
