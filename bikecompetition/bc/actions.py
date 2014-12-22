@@ -2,17 +2,11 @@ import json
 import threading
 
 from datetime import datetime
+from django.core.management import call_command
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from bikecompetition.bc import models as bcModels
-from bikecompetition.fakeclient import FakeClient
-
-
-# Competition distance in miles * 1000
-COMPETITION_DISTANCE = 50
-# Competition time in seconds
-COMPETITION_TIME = 30
 
 
 @csrf_exempt
@@ -27,11 +21,15 @@ def get_competitor(request):
 @csrf_exempt
 def get_competition(request):
     request_json = json.loads(request.body)
-    competition_type = request_json['competition_type']
+    competition_type = request_json.get('competition_type') or bcModels.COMPETITION_TYPE_TIME
     competitor = request_json['competitor']
+    competition_limit = request_json.get('competition_limit') or \
+                                         bcModels.DEFAULT_LIMIT_TIME \
+                                             if competition_type == bcModels.COMPETITION_TYPE_TIME \
+                                             else bcModels.DEFAULT_LIMIT_DISTANCE
     fake = request_json['fake']
     if int(fake):
-        threading.Thread(target=FakeClient(id=competitor, competition_type=competition_type).start).start()
+        threading.Thread(target=call_command, args=['fakeclient'], kwargs=dict(competitor_id=competitor, competition_type=competition_type, competition_limit=competition_limit)).start()
         return HttpResponse(content=json.dumps({}), content_type="application/json", status=200)
 
     competition = bcModels.Competition.objects.filter(type=competition_type).last()
@@ -42,7 +40,7 @@ def get_competition(request):
     )):
         competition = None
     if not competition:
-        competition = bcModels.Competition.objects.create(type=competition_type)
+        competition = bcModels.Competition.objects.create(type=competition_type, limit=competition_limit)
     competitor_status = bcModels.CompetitorStatus.objects.filter(
         competitor_id=competitor,
         competition_id=competition
@@ -60,6 +58,8 @@ def get_competition(request):
         'competition_type': competition.type,
         'competition_status': competitor_status.status,
         'competitor_count': competition.competitors.all().count(),
+        'competition_type': competition.type,
+        'competitor_limit': competition.limit,
     }
     return HttpResponse(content=json.dumps(resp_dict), content_type="application/json", status=201)
 
@@ -91,9 +91,9 @@ def update_competition(request):
                                                 timestamp=datetime.strptime(timestamp, '%d/%m/%Y %H:%M:%S.%f'))
         competitor_stats, competitor_times = bcModels.Competition.objects.get_stats(competition.id)
         if (competition.type == bcModels.COMPETITION_TYPE_DISTANCE and \
-                    any(((distance > COMPETITION_DISTANCE) for distance in competitor_stats.itervalues()))) or \
+                    any(((distance > competition.limit) for distance in competitor_stats.itervalues()))) or \
                 (competition.type == bcModels.COMPETITION_TYPE_TIME and \
-                         any(((timedelta > COMPETITION_TIME) for timedelta in competitor_times.itervalues()))):
+                         any(((timedelta > competition.limit) for timedelta in competitor_times.itervalues()))):
             bcModels.CompetitorStatus.objects.filter(
                 competition_id=competition
             ).update(status=bcModels.COMPETITION_STATUS_FINISHED)
@@ -105,6 +105,9 @@ def update_competition(request):
         'competition_status': competitor_status.status,
         'competition_stats': competitor_stats,
         'competition_times': competitor_times,
+        'competitor_count': competition.competitors.all().count(),
+        'competition_type': competition.type,
+        'competition_limit': competition.limit,
     }
     return HttpResponse(content=json.dumps(resp_dict), content_type="application/json", status=201)
 
@@ -127,5 +130,8 @@ def finish_competition(request):
         'competition_status': competitor_status.status,
         'competition_stats': competitor_stats,
         'competition_times': competitor_times,
+        'competitor_count': competition.competitors.all().count(),
+        'competition_type': competition.type,
+        'competition_limit': competition.limit,
     }
     return HttpResponse(content=json.dumps(resp_dict), content_type="application/json", status=200)

@@ -20,8 +20,15 @@ COMPETITION_STATUSES = (
 COMPETITION_TYPE_TIME = 0
 COMPETITION_TYPE_DISTANCE = 1
 COMPETITION_TYPES = (
-    (COMPETITION_TYPE_TIME, _i(u'Time Cpmpetition')),
-    (COMPETITION_TYPE_DISTANCE, _i(u'Distance Cpmpetition')),
+    (COMPETITION_TYPE_TIME, _i(u'Time Competition')),
+    (COMPETITION_TYPE_DISTANCE, _i(u'Distance Competition')),
+)
+
+DEFAULT_LIMIT_DISTANCE = 50.0
+DEFAULT_LIMIT_TIME = 30.0
+DEFAULT_LIMITS = (
+    (DEFAULT_LIMIT_DISTANCE, _i(u'Default Distance Limit')),
+    (DEFAULT_LIMIT_TIME, _i(u'Default Time Limit')),
 )
 
 
@@ -48,6 +55,7 @@ class CompetitionManager(models.Manager):
 class Competition(models.Model):
     competitors = models.ManyToManyField(Competitor)
     type = models.PositiveSmallIntegerField(choices=COMPETITION_TYPES, default=COMPETITION_TYPE_TIME)
+    limit = models.FloatField(default=50.0)
 
     objects = CompetitionManager()
 
@@ -56,7 +64,7 @@ class CompetitorStats(models.Model):
     timestamp = models.DateTimeField()
     competitor = models.ForeignKey(Competitor)
     competition = models.ForeignKey(Competition)
-    distance = models.PositiveIntegerField()
+    distance = models.FloatField()
 
 
 class CompetitorStatus(models.Model):
